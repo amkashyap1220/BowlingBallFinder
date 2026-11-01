@@ -11,7 +11,7 @@ the nearest equivalent.
 
 1. Merge the milestone 0 pull request into `main`.
 2. Cloudflare dashboard → **Workers & Pages** → **Create** → **Import a
-   repository** → pick `amkashyap1220/bowlingballfinder`.
+   repository** → pick `amkashyap1220/BowlingBallFinder`.
 3. Project name: **`bowlingballfinder`** (must match `name` in `wrangler.jsonc`).
 4. Build settings:
    - Build command: leave empty (the deploy runs `npm run build` itself)
