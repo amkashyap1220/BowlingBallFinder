@@ -1,0 +1,15 @@
+---
+// Your game: the questions and the estimated profile (milestone 2).
+import AppLayout from "../layouts/AppLayout.astro";
+import ProfileForm from "../components/ProfileForm.svelte";
+---
+<AppLayout title="Your game" current="/profile" description="Describe how you bowl and see your estimated speed, revs and hook.">
+  <p class="eyebrow">Your game</p>
+  <h1 class="page-title">How you bowl</h1>
+  <p class="lead">
+    You don't need to know any numbers. Tell us what you see on the lanes and
+    we'll estimate your speed, revs and hook. Every question is optional; the
+    first two tell us the most.
+  </p>
+  <ProfileForm client:load />
+</AppLayout>

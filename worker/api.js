@@ -6,12 +6,15 @@
      GET /api/me          the signed-in person (creates their row on first visit)
      GET /api/balls       the ball list, with filters (balls.js)
      GET /api/balls/:id   one ball
+     GET /api/profile     your answers and estimated profile (profile.js)
+     PUT /api/profile     save your answers
 
    Later milestones add their routes to ROUTES (see docs/PLAN.md).
    ========================================================================== */
 
 import { upsertUser } from "./users.js";
 import { ballsRoute, ballRoute } from "./balls.js";
+import { getProfileRoute, putProfileRoute } from "./profile.js";
 
 export const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -30,6 +33,8 @@ const ROUTES = {
   "GET /api/me": me,
   "GET /api/balls": ballsRoute,
   "GET /api/balls/:id": ballRoute,
+  "GET /api/profile": getProfileRoute,
+  "PUT /api/profile": putProfileRoute,
 };
 
 /** The route's params if `pattern` (e.g. "/api/balls/:id") matches `pathname`, else null. */

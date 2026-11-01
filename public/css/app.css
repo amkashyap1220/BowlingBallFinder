@@ -154,3 +154,40 @@ button.link { background: none; border: 0; padding: 0; color: var(--link); curso
 @media (min-width: 761px) {
   .sort-pick { display: none !important; }
 }
+
+/* ---------- 6. Your game ---------- */
+.profile-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--space-6); align-items: start; }
+.result { position: sticky; top: var(--space-4); }
+.questions { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+.questions fieldset {
+  margin: 0; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--card); padding: var(--space-4) var(--space-5) var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-3);
+}
+.questions legend { font-weight: 600; padding: 0 var(--space-2); margin-left: calc(-1 * var(--space-2)); }
+.questions label:not(.choice) { display: flex; flex-direction: column; gap: var(--space-1); font-size: var(--fs-sm); color: var(--muted); }
+.questions select, .questions input:not([type="radio"]):not([type="checkbox"]) { color: var(--text); width: 100%; min-width: 0; }
+.questions .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-3); }
+.choices { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
+.choices.stacked { flex-direction: column; }
+.choice { display: flex; align-items: flex-start; gap: var(--space-2); font-size: var(--fs-md); cursor: pointer; }
+.choice input { margin-top: 0.3em; accent-color: var(--link); }
+.brand-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-3); }
+.save-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+
+.result-list { margin: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.result-list dt { font-size: var(--fs-sm); color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.result-list dd { margin: 0; }
+.result-list dd:first-of-type { font-weight: 600; }
+.sure { font-size: var(--fs-xs); padding: 0 var(--space-2); border: 1px solid currentColor; border-radius: var(--radius-pill); }
+.sure.high { color: var(--mark); }
+.sure.medium { color: var(--link); }
+.sure.low { color: var(--label); }
+.result .notice { border-left-color: var(--label); }
+
+@media (max-width: 760px) {
+  .profile-layout { grid-template-columns: minmax(0, 1fr); }
+  .result { position: static; }
+  .questions fieldset { padding: var(--space-3) var(--space-4) var(--space-4); }
+}

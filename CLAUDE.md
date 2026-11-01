@@ -31,10 +31,11 @@ the whole project in its context.
 | `worker/api.js` | The JSON API: `ROUTES` maps `"METHOD /path"` (`:id` segments allowed) to handlers `(request, env, email, params)` |
 | `worker/users.js` | The `users` table |
 | `worker/balls.js` | The ball list: `GET /api/balls` (filters) and `/api/balls/:id` |
+| `worker/profile.js` | Your game: `GET/PUT /api/profile` (answers saved per user; profile worked out on read) |
 | `migrations/` | D1 (SQLite) schema, numbered files, applied in order. `0003_balls_seed.sql` is generated |
 | `data/balls.csv` | The ball list's reviewed source data (maker's specs + source URL per ball) |
 | `scripts/balls-sql.mjs` | `npm run balls:sql`: CSV → seed migration (DECISIONS.md #11) |
-| `src/lib/` | Pure logic, no DOM or `env`: `balls-data.js` reads/checks the CSV and builds the seed SQL |
+| `src/lib/` | Pure logic, no DOM or `env`: `balls-data.js` reads/checks the CSV and builds the seed SQL; `profile.js` turns answers into the estimated profile (`PROFILE_MODEL` holds every number) |
 | `src/layouts/AppLayout.astro` | Page shell: head, header (`NAV`), footer |
 | `src/pages/` | One `.astro` file per page; its path is its address |
 | `src/components/` | Svelte 5 components for the interactive parts |

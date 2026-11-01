@@ -61,10 +61,58 @@ Every question is optional and in plain words. In order of how much they tell us
    heavy/medium/light; lanes wood or synthetic if known.
 6. **Their arsenal** (milestone 3) and which ball they reach for first.
 7. **Known numbers** (optional): rev rate, axis rotation and tilt, PAP.
-8. **Preferences:** brands to include or skip, budget, newer releases only.
+8. **Preferences:** brands to include or skip, newer releases only. No budget:
+   the app is about finding the right reaction, not price.
 
 `profile.js` turns these into estimated **ranges** with a confidence, e.g.
-"probably 300–375 rpm, slightly rev-dominant". Measured numbers replace them.
+"probably 300–380 rpm, balanced". Measured numbers replace them.
+
+## Profile math (milestone 2; numbers in `PROFILE_MODEL`, to be tuned)
+
+**Speed** is always the speed the lane screen shows. Published rules of thumb
+use release speed, and screens read about 2 mph lower (they measure down the
+lane), so the published numbers are shifted by 2 mph.
+
+Starting point from style, from the usual published rev split (strokers under
+300 rpm, tweeners 300–370, crankers over 400, two-handers up to 600) and an
+average release speed of 17–18 mph:
+
+| Style | Screen speed (mph) | Rev rate (rpm) |
+| --- | --- | --- |
+| Stroker | 14–16 | 200–300 |
+| Tweener | 15–17 | 300–370 |
+| Cranker | 15.5–18 | 400–500 |
+| Two hands | 14–17 | 400–550 |
+
+Worked out in this order, each step using the one before:
+
+1. **Speed:** a typed number ±0.5 (high); Slow 12.5–14.5 / Medium 14.5–16.5 /
+   Fast 16.5–18.5 (medium); else the style range (low).
+2. **Hook** = boards out to the breakpoint plus boards back to the pocket:
+   (stand − breakpoint) + (17.5 − breakpoint). ±3 boards (high). With no
+   breakpoint, it's guessed as target − 0.35 × (stand − target) (gives 8 for
+   35/15, 6.5 for 20/10), ±4 (medium). Labels: under 20 a little, 20–29
+   moderate, 30–35 strong, 36+ big.
+3. **Rev rate:** rpm per mph = 7 + 0.55 × hook; times speed gives rpm from
+   hook. Blend 60% that and 40% the middle of the style range. Medium (±12%)
+   when boards, a speed and a style are all given and the two agree within
+   15%; else low (±20%). A typed rev rate is ±15 (high).
+4. **Match-up:** matched is 300 rpm at 17 mph release, ±50 rpm per mph, so
+   matched rpm = 300 + 50 × (screen speed − 15). Score = (rpm − matched) ÷ 50,
+   plus "what goes wrong": hooks early +1, hard to control when dry +0.5,
+   skids −1, won't turn on heavy oil −0.5. Below −1.5 speed-dominant, to −0.5
+   slightly, to +0.5 balanced, to +1.5 slightly rev-dominant, above that
+   rev-dominant. "Leaves corner pins" was left out: it happens both ways.
+5. With no board answers, hook is worked back from the ratio (low).
+
+The four example bowlers (stroker, tweener, cranker, two-hander) in
+`tests/profile.test.mjs` are the ones worked through by hand and agreed with
+the users. Sources: [Motiv](https://www.motivbowling.com/blog/am-i-rev-or-speed-dominant.html)
+(averages, 50 rpm per mph), [ballreviews.com](https://www.ballreviews.com/miscellaneous/rev-rate-vs-ball-speed/)
+(300 at 17 baseline, release speed, screens 2–3 mph lower),
+[Wikipedia: Bowling form](https://en.wikipedia.org/wiki/Bowling_form) (rev
+ranges by style). Lane screens differ between centers, so the 2 mph shift is
+the first thing to tune.
 
 ## Scoring (first version, to be tuned)
 

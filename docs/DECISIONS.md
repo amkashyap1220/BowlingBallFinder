@@ -74,3 +74,17 @@ only ever reads the reviewed CSV, never a request. To change the data later,
 edit the CSV, point the script at the next migration number, and run it.
 *Ruled out:* loading the CSV at runtime (no file system in the Worker), and
 hand-written SQL (easy to drift from the reviewed data).
+
+### 12. Profiles store answers, not estimates
+`profiles` keeps one row of answers (JSON, checked by `cleanAnswers()`) per
+save; the estimated profile is worked out from the newest row whenever it's
+read, by the same `src/lib/profile.js` the page uses. Tuning the numbers then
+updates everyone's profile, and old saves stay as history.
+*Ruled out:* storing the estimates (they'd go stale when the model changes),
+and a column per answer (a migration for every new question).
+
+### 13. Speeds are screen speeds
+Every speed the app asks for or shows is what the lane screen shows (or video
+measures as an average), because that's what bowlers can see. Published
+rules of thumb use release speed, so the profile math shifts them by 2 mph.
+Hook counts boards out to the breakpoint plus back to the pocket.

@@ -13,7 +13,7 @@ To start a milestone, open a new session and say:
 | --- | --- | --- |
 | 0 | Groundwork | ✅ Done |
 | 1 | Ball list | ✅ Done |
-| 2 | Your game: questions → profile | Not started |
+| 2 | Your game: questions → profile | ✅ Done |
 | 3 | Your arsenal | Not started |
 | 4 | Recommendations | Not started |
 | 5 | Measure from video | Not started |
@@ -76,7 +76,7 @@ Gaps: Motiv's pages show no release date for 4 of its 6 balls (left empty, so
 the "released after" filter hides them); Storm's "Power Edge" gives no grit.
 Checked locally with `npm run preview` at desktop and 390px, light and dark.
 
-## 2. Your game: questions → profile
+## 2. Your game: questions → profile ✅
 
 **Goal:** a bowler who knows none of their numbers can describe their game, and
 the app turns it into an estimated profile.
@@ -91,6 +91,16 @@ the app turns it into an estimated profile.
 
 **Done when:** each user can save their answers and see a profile that reads
 right to them.
+
+**Notes:** The questions, the math and four example bowlers were agreed with
+Alexander before building (docs/BOWLING.md, "Profile math"); the numbers were
+checked against published rules of thumb. Budget was dropped. Only the
+answers are stored (`profiles`, one row per save); the profile is worked out
+when read, so tuning `PROFILE_MODEL` updates everyone. A typed speed or rev
+rate counts as measured; milestone 5 should save video numbers into the same
+answers (`speed`, `revRate`, `revRateSource: "video"`). The page works the
+profile out live as you answer. Checked locally with `npm run preview` at
+desktop and 390px, light and dark.
 
 ## 3. Your arsenal
 
@@ -186,6 +196,10 @@ Ideas noticed along the way that don't belong to a milestone yet.
 - Name field on first sign-in (users.name exists, nothing sets it yet)
 - Ball list: a page per ball (`GET /api/balls/:id` exists; nothing links to
   it yet), and specs for other weights (makers publish 12–15 lb numbers too)
+- Your game: show past saves (the `profiles` rows are kept, nothing shows them)
+- Your game: let each user say whether the profile reads right, to tune
+  `PROFILE_MODEL`; and a "my center's screen reads release speed" switch if
+  the 2 mph shift turns out wrong for someone's center
 - Ball list: a spare/plastic section, if anyone wants spare balls in it
 - **Public sign-up** (anyone can make an account, or more than 50 people):
   replace Cloudflare Access with the app's own sign-in (emailed sign-in links
