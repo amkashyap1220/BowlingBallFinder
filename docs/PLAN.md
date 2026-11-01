@@ -19,6 +19,7 @@ To start a milestone, open a new session and say:
 | 5 | Measure from video | Not started |
 | 6 | Keeping the ball list current | Not started |
 | 7 | Automatic video tracking | Later |
+| 8 | Inviting friends (any time after 0) | Not started |
 
 ---
 
@@ -127,6 +128,43 @@ right to them.
   count turns automatically; the user confirms the result
 - Possibly axis rotation/tilt estimates; research-level, see docs/BOWLING.md
 
+## 8. Inviting friends
+
+Can be done any time after milestone 0; it doesn't depend on 1–7.
+
+**Goal:** Alexander adds or removes a friend from inside the app, in one step,
+with no trip to the Cloudflare dashboard.
+
+- **One list, in the database.** Migration: `users` gets `role` (`admin` or
+  `member`), `invited_by` and `removed_at`. The Worker's check in `access.js`
+  reads this list instead of the `ALLOWED_EMAILS` setting (keep
+  `ALLOWED_EMAILS` only to seed the first admins). Removing someone locks them
+  out on their next request, even if their Access sign-in hasn't expired.
+- **Access kept in step automatically.** The Access policy allows an Access
+  *group* instead of listed emails. When the list changes, the Worker rewrites
+  that group's emails through Cloudflare's API (`PUT
+  /accounts/{account_id}/access/groups/{group_id}`). New secrets:
+  `CF_API_TOKEN` (Access groups edit only), `CF_ACCOUNT_ID`, `ACCESS_GROUP_ID`.
+  Both changes succeed or neither does: if the API call fails, the database
+  isn't changed and the page says why.
+- `GET/POST/DELETE /api/admin/people`, admin-only (403 for everyone else);
+  page `/admin/people`: the list, an invite box, remove buttons. Only shown to
+  admins in the header.
+- No email sending: Access emails the sign-in code itself. The page offers a
+  ready-to-copy message with the link to send to the friend.
+- `docs/SETUP.md`: steps to create the group, point the policy at it, and make
+  the API token.
+- Tests: only admins can invite or remove; an invited email gets in; a removed
+  one is refused at once despite a valid Access token; the Access API gets the
+  right email list (fetch stubbed); a failed API call changes nothing; an admin
+  can't remove themselves.
+- Cost note: the check now reads D1 on every request. Fine at this size; if it
+  ever matters, cache the list in the Worker for a minute.
+
+**Done when:** Alexander invites a friend from `/admin/people`, the friend signs
+in at bowling.alexanderk.dev with no dashboard step, and removing them locks
+them out right away.
+
 ---
 
 ## Later
@@ -134,3 +172,7 @@ right to them.
 Ideas noticed along the way that don't belong to a milestone yet.
 
 - Name field on first sign-in (users.name exists, nothing sets it yet)
+- **Public sign-up** (anyone can make an account, or more than 50 people):
+  replace Cloudflare Access with the app's own sign-in (emailed sign-in links
+  or "Sign in with Google") in `worker/access.js` only; add upload limits for
+  videos (storage costs) and a short privacy note. See DECISIONS.md #9.
