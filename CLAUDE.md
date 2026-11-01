@@ -35,7 +35,7 @@ the whole project in its context.
 | `src/pages/` | One `.astro` file per page; its path is its address |
 | `src/components/` | Svelte 5 components for the interactive parts |
 | `public/css/app.css` | All styles (same tokens and look as alexanderk.dev) |
-| `tests/` | `node --test`; `tests/helpers/d1.mjs` is an in-memory D1 with all migrations applied, `helpers/access.mjs` fakes Access tokens |
+| `tests/` | `node --test`; `config.test.mjs` guards the privacy settings in `wrangler.jsonc`; `tests/helpers/d1.mjs` is an in-memory D1 with all migrations applied, `helpers/access.mjs` fakes Access tokens |
 | `docs/` | `PLAN.md` milestones, `DECISIONS.md`, `BOWLING.md` domain knowledge, `SETUP.md` Cloudflare dashboard steps |
 
 ## Commands
@@ -54,7 +54,9 @@ the whole project in its context.
 - **Security.** Every request goes through `access.js` (`run_worker_first: true`).
   API handlers get `email` from it; never read identity from the body, query or
   a client header. Every query on someone's data filters by their `user_id`.
-  No `workers.dev` or preview URLs (they'd skip Access).
+  No `workers.dev` or version preview URLs (they'd skip Access). Branch
+  previews (`"previews": {}` in `wrangler.jsonc`) stay empty: no bindings or
+  secrets, so they're locked. `tests/config.test.mjs` checks all of this.
 - **Database.** Never edit a migration that has shipped; add the next number
   (`0002_balls.sql`, ...). Use `?1`-style bound parameters, never string-built SQL.
   Each new table gets a test using `tests/helpers/d1.mjs`.

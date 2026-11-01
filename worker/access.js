@@ -29,9 +29,14 @@ export function missingSettings(env) {
   return REQUIRED.filter((name) => !String(env[name] ?? "").trim());
 }
 
-/** "Alexanderk.cloudflareaccess.com/" or "https://..." -> "https://alexanderk.cloudflareaccess.com" */
+/**
+ * The team's address, however the setting was written:
+ * "alexanderk", "Alexanderk.cloudflareaccess.com/", "https://alexanderk.cloudflareaccess.com/cdn-cgi/..."
+ * all give "https://alexanderk.cloudflareaccess.com".
+ */
 export function issuerFor(teamDomain) {
-  const host = String(teamDomain).trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "").toLowerCase();
+  let host = String(teamDomain).trim().toLowerCase().replace(/^https?:\/\//, "").split(/[/?#]/)[0];
+  if (host && !host.includes(".")) host += ".cloudflareaccess.com";   // just the team name
   return "https://" + host;
 }
 
@@ -47,9 +52,14 @@ export function allowedEmails(env) {
 const keyCache = new Map();   // issuer -> { fetchedAt, keys: Map<kid, CryptoKey> }
 
 async function loadKeys(issuer) {
-  const res = await fetch(issuer + "/cdn-cgi/access/certs");
-  if (!res.ok) throw new Error(`Couldn't load Access keys (${res.status})`);
-  const { keys = [] } = await res.json();
+  let keys;
+  try {
+    const res = await fetch(issuer + "/cdn-cgi/access/certs");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    ({ keys = [] } = await res.json());
+  } catch (err) {
+    throw new AccessCheckError("keys", `couldn't load Access keys from ${issuer} (${err.message})`);
+  }
   const map = new Map();
   for (const jwk of keys) {
     if (jwk.kty !== "RSA" || !jwk.kid) continue;
@@ -76,6 +86,18 @@ export function clearKeyCache() {
 
 /* ---------- The token ---------- */
 
+/** Why a token was refused; `code` picks the advice shown (see adviceFor). */
+export class AccessCheckError extends Error {
+  constructor(code, message, detail) {
+    super(message);
+    this.code = code;
+    this.detail = detail;
+  }
+}
+const fail = (code, message, detail) => {
+  throw new AccessCheckError(code, message, detail);
+};
+
 const b64urlBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
 const b64urlJson = (s) => JSON.parse(new TextDecoder().decode(b64urlBytes(s)));
 
@@ -86,7 +108,7 @@ const b64urlJson = (s) => JSON.parse(new TextDecoder().decode(b64urlBytes(s)));
  */
 export async function verifyAccessToken(token, { teamDomain, aud, now = Date.now() }) {
   const parts = String(token).split(".");
-  if (parts.length !== 3) throw new Error("malformed token");
+  if (parts.length !== 3) fail("malformed", "malformed token");
   const [h, p, s] = parts;
 
   let header, claims;
@@ -94,23 +116,27 @@ export async function verifyAccessToken(token, { teamDomain, aud, now = Date.now
     header = b64urlJson(h);
     claims = b64urlJson(p);
   } catch {
-    throw new Error("malformed token");
+    fail("malformed", "malformed token");
   }
-  if (header.alg !== "RS256") throw new Error("unexpected algorithm");
+  if (header.alg !== "RS256") fail("malformed", "unexpected algorithm");
 
+  // Team and application first: refusing early is always safe, and a wrong
+  // setting then gets named (with the token's value) instead of surfacing as
+  // a failed key download. Nothing is trusted until the signature checks out.
   const issuer = issuerFor(teamDomain);
+  if (claims.iss !== issuer) fail("team", "token is from another team", String(claims.iss));
+  const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+  if (!audiences.includes(aud)) fail("application", "token is for another application", audiences.join(", "));
+
   const key = await keyFor(issuer, header.kid);
-  if (!key) throw new Error("unknown signing key");
+  if (!key) fail("signature", "unknown signing key");
   const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64urlBytes(s), new TextEncoder().encode(h + "." + p));
-  if (!ok) throw new Error("bad signature");
+  if (!ok) fail("signature", "bad signature");
 
   const nowS = Math.floor(now / 1000);
-  const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-  if (!audiences.includes(aud)) throw new Error("token is for another application");
-  if (claims.iss !== issuer) throw new Error("token is from another team");
-  if (typeof claims.exp !== "number" || claims.exp + CLOCK_SKEW_S < nowS) throw new Error("token expired");
-  if (typeof claims.nbf === "number" && claims.nbf - CLOCK_SKEW_S > nowS) throw new Error("token not valid yet");
-  if (typeof claims.email !== "string" || !claims.email.includes("@")) throw new Error("token has no email");
+  if (typeof claims.exp !== "number" || claims.exp + CLOCK_SKEW_S < nowS) fail("expired", "token expired");
+  if (typeof claims.nbf === "number" && claims.nbf - CLOCK_SKEW_S > nowS) fail("expired", "token not valid yet");
+  if (typeof claims.email !== "string" || !claims.email.includes("@")) fail("malformed", "token has no email");
   return claims;
 }
 
@@ -129,6 +155,28 @@ function refuse(request, status, message) {
 <body style="font-family:ui-monospace,monospace;max-width:40rem;margin:4rem auto;padding:0 1rem;line-height:1.5">
 <h1 style="font-size:1.3rem">Bowling Ball Finder</h1><p>${escapeHtml(message)}</p></body>`;
   return new Response(html, { status, headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } });
+}
+
+/**
+ * What to tell the person (usually Alexander, setting up) when their token is
+ * refused. Names the Worker setting to fix; never shows a setting's secret value.
+ * The token's own team and application values are shown: they belong to the
+ * person who just signed in, and only a token signed by the configured team
+ * is ever accepted, so knowing them doesn't help anyone else in.
+ */
+export function adviceFor(err) {
+  switch (err?.code) {
+    case "team":
+      return `The ACCESS_TEAM_DOMAIN setting doesn't match the Cloudflare Access team that signed you in. Set it to: ${String(err.detail).replace(/^https:\/\//, "")}`;
+    case "application":
+      return `The ACCESS_AUD setting doesn't match this Access application. Set it to the application's Application Audience (AUD) Tag: ${err.detail}`;
+    case "keys":
+      return "Couldn't load the Cloudflare Access signing keys. Check the ACCESS_TEAM_DOMAIN setting: it should look like yourteam.cloudflareaccess.com (Zero Trust > Settings).";
+    case "expired":
+      return "Your sign-in has expired. Sign out and sign in again.";
+    default:
+      return "Sign out and sign in again.";
+  }
 }
 
 /**
@@ -153,8 +201,8 @@ export async function authenticate(request, env) {
   try {
     claims = await verifyAccessToken(token, { teamDomain: env.ACCESS_TEAM_DOMAIN, aud: env.ACCESS_AUD.trim() });
   } catch (err) {
-    console.warn("access token rejected:", err.message);
-    return { ok: false, response: refuse(request, 403, "Your sign-in couldn't be checked. Sign out and sign in again.") };
+    console.warn("access token rejected:", err.code ?? "error", err.message);
+    return { ok: false, response: refuse(request, 403, `Your sign-in couldn't be checked. ${adviceFor(err)}`) };
   }
 
   const email = claims.email.trim().toLowerCase();

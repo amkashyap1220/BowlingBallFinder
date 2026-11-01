@@ -54,3 +54,11 @@ group in step through the API. Access's free plan covers up to 50 people.
 sign-in, upload limits and a privacy note; worth it only if the app goes
 public. Because identity comes only from `worker/access.js`, that switch
 changes that one file, not the pages, database or API.
+
+### 10. Branch previews exist, but empty
+Cloudflare builds every non-main branch with `npx wrangler preview`, which
+fails without a `previews` block in `wrangler.jsonc`. The block is kept empty:
+previews live outside Cloudflare Access, so they get no database, storage or
+secrets and can only answer "Not set up yet". What they give is a build check
+on every pull request. Testing the app itself happens locally
+(`npm run preview`). `tests/config.test.mjs` fails if the block gains anything.
