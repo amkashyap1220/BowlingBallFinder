@@ -1,0 +1,32 @@
+---
+// Home: what the app does and what's ready. Each card becomes a link when
+// its milestone ships (docs/PLAN.md): set its href and ready: true.
+import AppLayout from "../layouts/AppLayout.astro";
+
+const SECTIONS = [
+  { title: "Ball list", text: "Every current ball with its specs: RG, differential, mass bias, coverstock and factory finish.", milestone: 1, ready: false, href: "" },
+  { title: "Your game", text: "Plain-language questions about how you bowl and where you play, turned into a profile of your speed, revs and hook.", milestone: 2, ready: false, href: "" },
+  { title: "Your arsenal", text: "The balls you own and how each one reads the lane for you.", milestone: 3, ready: false, href: "" },
+  { title: "Recommendations", text: "The balls that fill the biggest gap in your arsenal, each with the reason why.", milestone: 4, ready: false, href: "" },
+  { title: "Measure from video", text: "Film one shot in slow motion and measure your ball speed and rev rate from it.", milestone: 5, ready: false, href: "" },
+];
+---
+<AppLayout title="Home" current="/">
+  <p class="eyebrow">Bowling Ball Finder</p>
+  <h1 class="page-title">Find the ball your arsenal is missing</h1>
+  <p class="lead">
+    Answer questions about how you bowl, add the balls you already own, and get
+    recommendations for the reaction you don't have yet.
+  </p>
+
+  <h2 class="section-title">What's here</h2>
+  <div class="grid">
+    {SECTIONS.map((s) => (
+      <div class="card">
+        <span class={s.ready ? "pill ready" : "pill"}>{s.ready ? "Ready" : "Coming soon"}</span>
+        <h3>{s.ready ? <a href={s.href}>{s.title}</a> : s.title}</h3>
+        <p>{s.text}</p>
+      </div>
+    ))}
+  </div>
+</AppLayout>
