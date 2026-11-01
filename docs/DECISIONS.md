@@ -45,3 +45,12 @@ Clips are kept in R2 so they can be measured again as the tools improve.
 To avoid one long conversation losing track ("context rot"), each session does
 one milestone from docs/PLAN.md, starting from CLAUDE.md and the docs, and
 leaves the docs up to date for the next.
+
+### 9. Friends join by invite, not by signing up
+More people are expected (friends), so milestone 8 lets the admin invite and
+remove people inside the app, keeping one list in D1 and Cloudflare Access's
+group in step through the API. Access's free plan covers up to 50 people.
+*Ruled out for now:* open sign-up. It would mean replacing Access with our own
+sign-in, upload limits and a privacy note; worth it only if the app goes
+public. Because identity comes only from `worker/access.js`, that switch
+changes that one file, not the pages, database or API.
