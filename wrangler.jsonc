@@ -15,9 +15,16 @@
   },
   // The app's only address. Cloudflare Access guards it (docs/SETUP.md).
   "routes": [{ "pattern": "bowling.alexanderk.dev", "custom_domain": true }],
-  // No *.workers.dev or preview addresses: they would sit outside Access
+  // No *.workers.dev or version-preview addresses: they would sit outside Access
   "workers_dev": false,
   "preview_urls": false,
+  // Branch previews (Cloudflare builds every non-main branch with
+  // `npx wrangler preview`, which needs this block). Deliberately EMPTY: a
+  // preview gets no database and none of the sign-in settings, so it can
+  // only answer "Not set up yet". It's there so every pull request gets a
+  // "builds and uploads" check. Never add bindings or secrets here
+  // (tests/config.test.mjs checks).
+  "previews": {},
   // The database. Cloudflare creates it on the first deploy; the tables come
   // from migrations/ (npm run db:migrate:remote, or the deploy command in docs/SETUP.md)
   "d1_databases": [{ "binding": "DB", "database_name": "bowlingballfinder", "migrations_dir": "migrations" }],
