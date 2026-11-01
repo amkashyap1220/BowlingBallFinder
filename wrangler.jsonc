@@ -1,0 +1,26 @@
+{
+  // Must match the Worker's name in the Cloudflare dashboard
+  "name": "bowlingballfinder",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-20",
+  // Astro builds the pages into dist/ before every deploy (and wrangler dev)
+  "build": { "command": "npm run build" },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // EVERY request goes through the Worker first, so nothing (not even a
+    // CSS file) is served before worker/access.js has checked the sign-in
+    "run_worker_first": true
+  },
+  // The app's only address. Cloudflare Access guards it (docs/SETUP.md).
+  "routes": [{ "pattern": "bowling.alexanderk.dev", "custom_domain": true }],
+  // No *.workers.dev or preview addresses: they would sit outside Access
+  "workers_dev": false,
+  "preview_urls": false,
+  // The database. Cloudflare creates it on the first deploy; the tables come
+  // from migrations/ (npm run db:migrate:remote, or the deploy command in docs/SETUP.md)
+  "d1_databases": [{ "binding": "DB", "database_name": "bowlingballfinder", "migrations_dir": "migrations" }],
+  // Keep request logs in the dashboard (Worker > Observability)
+  "observability": { "enabled": true }
+}

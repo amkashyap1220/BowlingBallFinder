@@ -1,0 +1,56 @@
+---
+// The shell every page uses: head, header (app name, sections, who's signed
+// in) and footer. Add a section to the header by adding it to NAV.
+import Account from "../components/Account.svelte";
+
+interface Props {
+  title: string;          // the page's own name; " · Bowling Ball Finder" is added
+  description?: string;
+  current?: string;       // NAV href of this page, to highlight it
+}
+
+const { title, description = "Find the next bowling ball for your arsenal.", current } = Astro.props;
+
+// Sections appear here as their milestones ship (docs/PLAN.md)
+const NAV: { href: string; label: string }[] = [
+  { href: "/", label: "Home" },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{title === "Home" ? "Bowling Ball Finder" : `${title} · Bowling Ball Finder`}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/app.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="wrap">
+        <a class="brand" href="/"><img src="/favicon.svg" alt="" />Bowling Ball Finder</a>
+        <nav class="app-nav" aria-label="Sections">
+          {NAV.map((n) => <a href={n.href} aria-current={n.href === current ? "page" : undefined}>{n.label}</a>)}
+        </nav>
+        <Account client:load />
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <slot />
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <div class="wrap">
+        A <a href="https://alexanderk.dev/projects/bowling-ball-finder">project</a> by <a href="https://alexanderk.dev">Alexander Kashyap</a>.
+      </div>
+    </footer>
+  </body>
+</html>

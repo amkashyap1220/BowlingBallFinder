@@ -1,0 +1,19 @@
+{
+  "name": "bowlingballfinder",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "npm run build && wrangler dev",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@astrojs/svelte": "9.1.0",
+    "astro": "7.3.8",
+    "svelte": "5.57.2",
+    "wrangler": "4.156.0"
+  }
+}

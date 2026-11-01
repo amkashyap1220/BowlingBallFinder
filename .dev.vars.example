@@ -1,0 +1,4 @@
+# Copy to .dev.vars (never committed) for `npm run preview` on your computer.
+# Act as this person without Cloudflare Access. Ignored whenever ACCESS_AUD is
+# set, so it can't open the deployed app.
+DEV_FAKE_USER=you@example.com
