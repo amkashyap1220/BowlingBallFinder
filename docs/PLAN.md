@@ -11,7 +11,7 @@ To start a milestone, open a new session and say:
 
 | # | Milestone | Status |
 | --- | --- | --- |
-| 0 | Groundwork | ✅ Code done; dashboard setup in docs/SETUP.md |
+| 0 | Groundwork | ✅ Done |
 | 1 | Ball list | Not started |
 | 2 | Your game: questions → profile | Not started |
 | 3 | Your arsenal | Not started |
@@ -39,7 +39,8 @@ To start a milestone, open a new session and say:
 see "Signed in as …"; anyone else can't. (Needs the dashboard steps in SETUP.md.)
 
 **Notes:** Local check passed: `wrangler dev` with a local D1 serves the pages
-and `/api/me`, and stays locked (503) when settings are missing.
+and `/api/me`, and stays locked (503) when settings are missing. Deployed and
+set up on Cloudflare: done.
 
 ---
 
