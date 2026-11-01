@@ -42,8 +42,15 @@ token under My Profile → API Tokens.
    - Name: The three of us
    - Action: **Allow**
    - Include → **Emails**: the three email addresses
-4. Login methods: **One-time PIN** (on by default) is all you need. Access
-   emails a code to the address; no passwords.
+4. Login methods: **One-time PIN**. Access emails a code to the address; no
+   passwords. New Zero Trust accounts only offer the **Cloudflare** login
+   (your Cloudflare account) at first, so:
+   1. **Zero Trust → Integrations → Identity providers → Add new → One-time
+      PIN**, and save.
+   2. Back in the application's **Login methods**, select only **One-time
+      PIN** (untick Cloudflare and anything else).
+   3. Turn on **Instant Auth**, so the sign-in page goes straight to the email
+      box instead of asking which login method to use.
 5. Save, then open the application and copy its **Application Audience (AUD)
    Tag** (on its overview or basic information).
 

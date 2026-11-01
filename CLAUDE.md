@@ -28,9 +28,13 @@ the whole project in its context.
 | --- | --- |
 | `worker/index.js` | Worker entry: every request is checked by `access.js`, then goes to `api.js` (`/api/*`) or the built files |
 | `worker/access.js` | Who is signed in: verifies the Cloudflare Access token and the `ALLOWED_EMAILS` list. The **only** place identity comes from |
-| `worker/api.js` | The JSON API: `ROUTES` maps `"METHOD /path"` to handlers `(request, env, email)` |
+| `worker/api.js` | The JSON API: `ROUTES` maps `"METHOD /path"` (`:id` segments allowed) to handlers `(request, env, email, params)` |
 | `worker/users.js` | The `users` table |
-| `migrations/` | D1 (SQLite) schema, numbered files, applied in order |
+| `worker/balls.js` | The ball list: `GET /api/balls` (filters) and `/api/balls/:id` |
+| `migrations/` | D1 (SQLite) schema, numbered files, applied in order. `0003_balls_seed.sql` is generated |
+| `data/balls.csv` | The ball list's reviewed source data (maker's specs + source URL per ball) |
+| `scripts/balls-sql.mjs` | `npm run balls:sql`: CSV → seed migration (DECISIONS.md #11) |
+| `src/lib/` | Pure logic, no DOM or `env`: `balls-data.js` reads/checks the CSV and builds the seed SQL |
 | `src/layouts/AppLayout.astro` | Page shell: head, header (`NAV`), footer |
 | `src/pages/` | One `.astro` file per page; its path is its address |
 | `src/components/` | Svelte 5 components for the interactive parts |
@@ -46,6 +50,7 @@ the whole project in its context.
   `DEV_FAKE_USER` in `.dev.vars` signs you in locally (it's ignored whenever
   `ACCESS_AUD` is set, so it can't open the deployed app)
 - `npm run dev`: Astro only (pages, no Worker or API); fine for layout work
+- `npm run balls:sql`: after editing `data/balls.csv`, regenerate the seed migration
 - `npm run db:migrate:remote`: apply migrations to the real database (the
   deploy also does this; see `docs/SETUP.md`)
 

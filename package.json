@@ -8,7 +8,8 @@
     "preview": "npm run build && wrangler dev",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
-    "test": "node --test"
+    "test": "node --test",
+    "balls:sql": "node scripts/balls-sql.mjs"
   },
   "devDependencies": {
     "@astrojs/svelte": "9.1.0",

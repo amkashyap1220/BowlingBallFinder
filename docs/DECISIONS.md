@@ -62,3 +62,15 @@ previews live outside Cloudflare Access, so they get no database, storage or
 secrets and can only answer "Not set up yet". What they give is a build check
 on every pull request. Testing the app itself happens locally
 (`npm run preview`). `tests/config.test.mjs` fails if the block gains anything.
+
+### 11. Ball data: a reviewed CSV, loaded by a generated seed migration
+`data/balls.csv` is the source; `npm run balls:sql` writes it into a seed
+migration as add-or-update by brand + name, so changes are diffable and every
+database (local, tests, Cloudflare) gets the same rows through the normal
+migrations. Specs are the 16 lb numbers from the maker's own page, never a
+retailer's, and brands' own hook/flare ratings aren't stored. A migration
+can't use bound parameters, so the generator writes escaped SQL literals; it
+only ever reads the reviewed CSV, never a request. To change the data later,
+edit the CSV, point the script at the next migration number, and run it.
+*Ruled out:* loading the CSV at runtime (no file system in the Worker), and
+hand-written SQL (easy to drift from the reviewed data).

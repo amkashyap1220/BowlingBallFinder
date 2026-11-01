@@ -1,0 +1,15 @@
+---
+// The ball list: every ball with its specs, filterable (milestone 1).
+import AppLayout from "../layouts/AppLayout.astro";
+import BallList from "../components/BallList.svelte";
+---
+<AppLayout title="Ball list" current="/balls" description="Current bowling balls with their specs.">
+  <p class="eyebrow">Ball list</p>
+  <h1 class="page-title">Balls and their specs</h1>
+  <p class="lead">
+    The numbers are the maker's own, for a 16 lb ball, and each ball links to
+    the page they came from. Specs are only part of the story: treat this as
+    a starting point for a talk with your pro shop.
+  </p>
+  <BallList client:load />
+</AppLayout>
