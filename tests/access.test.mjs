@@ -75,10 +75,55 @@ test("DEV_FAKE_USER works locally but never once Access is set up", async (t) =>
   assert.equal(deployed.ok, false);
 });
 
-test("the team domain can be written with or without https:// and a trailing slash", () => {
-  for (const d of [TEAM, "https://" + TEAM, TEAM + "/", "HTTPS://" + TEAM.toUpperCase() + "/"]) {
-    assert.equal(issuerFor(d), "https://" + TEAM);
+test("the team domain can be written as the team name, the domain, or a full address", () => {
+  for (const d of ["testteam", " TestTeam ", TEAM, "https://" + TEAM, TEAM + "/", "HTTPS://" + TEAM.toUpperCase() + "/", `https://${TEAM}/cdn-cgi/access/certs`]) {
+    assert.equal(issuerFor(d), "https://" + TEAM, d);
   }
+});
+
+// What the refusal page says, for the setup mistakes that are easy to make
+async function refusalText(token, env) {
+  const r = await authenticate(req(token), env);
+  assert.equal(r.ok, false);
+  assert.equal(r.response.status, 403);
+  return r.response.text();
+}
+
+test("a wrong ACCESS_TEAM_DOMAIN is named, with the team that signed you in", async (t) => {
+  const certs = stubCerts([signer.jwk]);
+  t.after(certs.restore);
+  const text = await refusalText(await signer.sign(claimsFor("alex@example.com")), settings({ ACCESS_TEAM_DOMAIN: "wrongteam.cloudflareaccess.com" }));
+  assert.match(text, /ACCESS_TEAM_DOMAIN/);
+  assert.match(text, new RegExp(TEAM.replace(/\./g, "\\.")));
+  assert.equal(certs.count, 0, "refused before downloading any keys");
+});
+
+test("a wrong ACCESS_AUD is named, with the application's AUD tag from the token", async (t) => {
+  const certs = stubCerts([signer.jwk]);
+  t.after(certs.restore);
+  const text = await refusalText(await signer.sign(claimsFor("alex@example.com")), settings({ ACCESS_AUD: "copied-the-wrong-thing" }));
+  assert.match(text, /ACCESS_AUD/);
+  assert.match(text, new RegExp(AUD));
+  assert.doesNotMatch(text, /copied-the-wrong-thing/, "never shows the setting's own value");
+});
+
+test("a team domain with no keys behind it says to check ACCESS_TEAM_DOMAIN", async (t) => {
+  const certs = stubCerts([signer.jwk]);   // only serves keys for TEAM
+  t.after(certs.restore);
+  const other = "otherteam.cloudflareaccess.com";
+  const token = await signer.sign(claimsFor("alex@example.com", { iss: "https://" + other }));
+  const text = await refusalText(token, settings({ ACCESS_TEAM_DOMAIN: other }));
+  assert.match(text, /signing keys/);
+  assert.match(text, /ACCESS_TEAM_DOMAIN/);
+});
+
+test("matching team and application values never get a forged token in", async (t) => {
+  const certs = stubCerts([signer.jwk]);
+  t.after(certs.restore);
+  const forger = await makeSigner("key-1");
+  const r = await authenticate(req(await forger.sign(claimsFor("alex@example.com"))), settings());
+  assert.equal(r.ok, false);
+  assert.match(await r.response.text(), /Sign out and sign in again/);
 });
 
 test("verifyAccessToken returns the token's claims", async (t) => {

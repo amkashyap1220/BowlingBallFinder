@@ -54,7 +54,7 @@ type **Secret** (secrets survive every deploy):
 
 | Name | Value |
 | --- | --- |
-| `ACCESS_TEAM_DOMAIN` | `<team>.cloudflareaccess.com` (from step 2.1) |
+| `ACCESS_TEAM_DOMAIN` | `<team>.cloudflareaccess.com` (from step 2.1; the team name alone works too) |
 | `ACCESS_AUD` | the AUD tag from step 2.5 |
 | `ALLOWED_EMAILS` | the same three emails, comma-separated |
 
@@ -71,10 +71,14 @@ too, so loosening the Access policy by mistake doesn't open the app.
 | You see | Fix |
 | --- | --- |
 | "Not set up yet. Missing Worker settings: …" | Add the settings it names (step 3) |
-| "Your sign-in couldn't be checked" | `ACCESS_TEAM_DOMAIN` or `ACCESS_AUD` doesn't match the Access application |
+| "Your sign-in couldn't be checked. The ACCESS_… setting doesn't match …" | Set that setting to the value the message shows (it comes from your own sign-in) |
+| "Your sign-in couldn't be checked. Couldn't load the … signing keys" | `ACCESS_TEAM_DOMAIN` isn't a real team domain: copy it from Zero Trust > Settings |
 | "… isn't on this app's list of users" | Add the email to `ALLOWED_EMAILS` |
 | Header says "The database isn't set up yet" | Run the migrations: redeploy, or `npx wrangler d1 migrations apply DB --remote` |
 | The page loads with no sign-in prompt | The Access application's domain doesn't match `bowling.alexanderk.dev` |
+
+Every refused sign-in is also logged with its reason: Worker → **Observability**
+(or **Logs**), search for `access token rejected`.
 
 ## Adding or removing a person
 
