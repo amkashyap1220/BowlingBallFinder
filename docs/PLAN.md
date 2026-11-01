@@ -12,7 +12,7 @@ To start a milestone, open a new session and say:
 | # | Milestone | Status |
 | --- | --- | --- |
 | 0 | Groundwork | ✅ Done |
-| 1 | Ball list | Not started |
+| 1 | Ball list | ✅ Done |
 | 2 | Your game: questions → profile | Not started |
 | 3 | Your arsenal | Not started |
 | 4 | Recommendations | Not started |
@@ -44,7 +44,7 @@ set up on Cloudflare: done.
 
 ---
 
-## 1. Ball list
+## 1. Ball list ✅
 
 **Goal:** every current high-end ball, with specs, browsable and filterable.
 
@@ -64,6 +64,17 @@ set up on Cloudflare: done.
 
 **Done when:** all three users can browse and filter the list; every ball shows
 where its specs came from.
+
+**Notes:** 48 balls from all 11 brands, every number copied from the maker's
+own page (linked per ball) for the 16 lb ball, as of 1 Nov 2026. The data is
+`data/balls.csv`; `npm run balls:sql` turns it into
+`migrations/0003_balls_seed.sql`, and a test fails if the two drift apart.
+Columns beyond the plan: `surface_grit` (last grit the maker names), `finish`
+(sanded or polished, from the surface text: "Factory Compound", Storm's "Power
+Edge" and Motiv's "LSP" count as polished) and `notes` for anything odd.
+Gaps: Motiv's pages show no release date for 4 of its 6 balls (left empty, so
+the "released after" filter hides them); Storm's "Power Edge" gives no grit.
+Checked locally with `npm run preview` at desktop and 390px, light and dark.
 
 ## 2. Your game: questions → profile
 
@@ -173,6 +184,9 @@ them out right away.
 Ideas noticed along the way that don't belong to a milestone yet.
 
 - Name field on first sign-in (users.name exists, nothing sets it yet)
+- Ball list: a page per ball (`GET /api/balls/:id` exists; nothing links to
+  it yet), and specs for other weights (makers publish 12–15 lb numbers too)
+- Ball list: a spare/plastic section, if anyone wants spare balls in it
 - **Public sign-up** (anyone can make an account, or more than 50 people):
   replace Cloudflare Access with the app's own sign-in (emailed sign-in links
   or "Sign in with Google") in `worker/access.js` only; add upload limits for

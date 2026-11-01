@@ -21,6 +21,7 @@ sign-in. Data lives in Cloudflare D1 (SQLite).
 | --- | --- |
 | `worker/` | The Worker: sign-in check, JSON API, database access |
 | `migrations/` | The database tables |
+| `data/` | The ball list (`balls.csv`), with the maker's page for every ball |
 | `src/` | Pages, layout and Svelte components |
 | `public/` | Styles and icons |
 | `tests/` | `npm test` |
